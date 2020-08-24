@@ -25,6 +25,8 @@ const executeButton = document.getElementById('execute');
 let droppedFiles = [];  //画像ファイルを格納する変数
 let convertedFiles = [];
 
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
 
 //ファイルのインプット
 fileArea.addEventListener('dragover', function (evt) {
@@ -99,12 +101,11 @@ function removeCanvasElement() {
 function getPDFpageLength(PDFdata) {
     //非同期処理の戻り値を合わせる
     return new Promise(function (resolve, reject) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
 
         let loadingTask = pdfjsLib.getDocument({ data: PDFdata });
         loadingTask.promise.then(function (pdf) {
             //console.log(pdf.numPages);
+            loadingTask.destroy();
             resolve(pdf.numPages);
         });
     })
@@ -112,9 +113,7 @@ function getPDFpageLength(PDFdata) {
 
 function drawPDFinCanvas(PDFlength, PDFdata) {   //pagenum = 1..*
     return new Promise(function (resolve, reject) {
-
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
+        //pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
 
         let count = 0;
         for (let pageNum = 1; pageNum <= PDFlength; pageNum++) {
@@ -127,7 +126,6 @@ function drawPDFinCanvas(PDFlength, PDFdata) {   //pagenum = 1..*
 
                     // Fetch the page.
                     let scale = config.scale;
-                    console.log(scale);
                     let viewport = page.getViewport({ scale: scale, });
 
                     // Prepare canvas using PDF page dimensions.
@@ -142,9 +140,11 @@ function drawPDFinCanvas(PDFlength, PDFdata) {   //pagenum = 1..*
                     };
                     page.render(renderContext).promise.then(function () {
                         if (count == PDFlength - 1) {
+                            loadingTask.destroy();
                             resolve();
                         }
                         else {
+                            loadingTask.destroy();
                             count++;
                         }
                     });
@@ -173,7 +173,7 @@ function compressToZip(PDFlength) {
 
     for (let i = 1; i <= PDFlength; i++) {
         let canvas = document.getElementById('PDFpage_' + i);
-        let num = threeDigits(config.threeDigit, i);
+        let num = threeDigits(config.threeDigit, i - 1);
         canvas.toBlob(function (image) {
             zip.folder(config.folderName)
                 .file(config.imageFileName + underscore + num + extention, image, { base64: true });
