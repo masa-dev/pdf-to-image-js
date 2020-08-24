@@ -107,11 +107,11 @@ function getPDFpageLength(PDFdata) {
         let loadingTask = pdfjsLib.getDocument({ data: PDFdata });
         loadingTask.promise.then(function (pdf) {
             //console.log(pdf.numPages);
-            loadingTask.destroy();
-
             //ロード削除
             deleteLoadingAnimation();
             resolve(pdf.numPages);
+
+            loadingTask.destroy();
         });
     })
 }
@@ -121,7 +121,7 @@ function drawPDFinCanvas(PDFlength, PDFdata) {   //pagenum = 1..*
         //pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
 
         //ロード表示
-        displayLoadingAnimation('parrot', 'drawing...');
+        displayLoadingAnimation('fastparrot', 'drawing...');
 
         let count = 0;
         for (let pageNum = 1; pageNum <= PDFlength; pageNum++) {
@@ -148,15 +148,15 @@ function drawPDFinCanvas(PDFlength, PDFdata) {   //pagenum = 1..*
                     };
                     page.render(renderContext).promise.then(function () {
                         if (count == PDFlength - 1) {
-                            loadingTask.destroy();
+                            resolve();
 
                             //ロード削除
                             deleteLoadingAnimation();
-                            resolve();
+                            loadingTask.destroy();
                         }
                         else {
-                            loadingTask.destroy();
                             count++;
+                            loadingTask.destroy();
                         }
                     });
                 });
