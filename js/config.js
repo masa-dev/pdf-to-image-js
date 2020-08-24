@@ -5,7 +5,7 @@ const config = {
     // Modal Window //
     type: 'image/jpeg',
     quality: 0.8,
-    scale: 1.5,
+    scale: 2.0,
     // Modal Window //
 
     threeDigit: true,
@@ -19,7 +19,7 @@ const config = {
         ];
 
         for (let name of nameList) {
-            let element = configElement[name.property];
+            console.log(element.value, this[name.property])
             if (element.value != this[name.property]) {
                 element.value = this[name.property];
             }

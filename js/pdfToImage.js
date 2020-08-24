@@ -101,11 +101,16 @@ function removeCanvasElement() {
 function getPDFpageLength(PDFdata) {
     //非同期処理の戻り値を合わせる
     return new Promise(function (resolve, reject) {
+        //ロード表示
+        displayLoadingAnimation('parrot', 'get length...');
 
         let loadingTask = pdfjsLib.getDocument({ data: PDFdata });
         loadingTask.promise.then(function (pdf) {
             //console.log(pdf.numPages);
             loadingTask.destroy();
+
+            //ロード削除
+            deleteLoadingAnimation();
             resolve(pdf.numPages);
         });
     })
@@ -114,6 +119,9 @@ function getPDFpageLength(PDFdata) {
 function drawPDFinCanvas(PDFlength, PDFdata) {   //pagenum = 1..*
     return new Promise(function (resolve, reject) {
         //pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
+
+        //ロード表示
+        displayLoadingAnimation('parrot', 'drawing...');
 
         let count = 0;
         for (let pageNum = 1; pageNum <= PDFlength; pageNum++) {
@@ -141,6 +149,9 @@ function drawPDFinCanvas(PDFlength, PDFdata) {   //pagenum = 1..*
                     page.render(renderContext).promise.then(function () {
                         if (count == PDFlength - 1) {
                             loadingTask.destroy();
+
+                            //ロード削除
+                            deleteLoadingAnimation();
                             resolve();
                         }
                         else {
@@ -158,6 +169,9 @@ function compressToZip(PDFlength) {
     let zip = new JSZip();
     let count = 0;
     let extention, underscore;  //拡張子，アンダースコア
+
+    //ロード表示
+    displayLoadingAnimation('parrot', 'saving...');
 
     if (config.type == 'image/jpeg') {
         extention = '.jpg';
@@ -182,6 +196,8 @@ function compressToZip(PDFlength) {
                 zip.generateAsync({ type: 'blob' }).then(function (content) {
                     //see FileSaver.js
                     saveAs(content, 'pdf.zip');
+                    //ロード削除
+                    deleteLoadingAnimation();
                 });
             } else {
                 count++;
