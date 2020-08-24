@@ -6,7 +6,7 @@
 
 ## 公開しているサイト
 
-https://masa-dev.github.io/image-compressor-js/
+https://masa-dev.github.io/pdf-to-image-js/
 
 
 ## 概要
